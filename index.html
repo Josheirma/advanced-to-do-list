@@ -38,7 +38,7 @@
       id: Date.now(),        // Unique ID based on current timestamp
       title,                 // To-do text title
       completed: false,      // Initially not completed
-      dueDate: dueDate ? new Date(dueDate) : null  // Convert dueDate string to Date object or null
+      dueDate: dueDate ? parseDateAsLocal(dueDate) : null  // Convert dueDate string to Date object or null
     };
   }
 
@@ -144,6 +144,7 @@
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', e.currentTarget.dataset.id);
     this.classList.add('dragging');
+    
   }
 
   // Allow drag over by preventing default
@@ -191,6 +192,13 @@
     titleInput.value = '';
     dueDateInput.value = '';
   });
+
+
+  function parseDateAsLocal(dateString) {
+  const [year, month, day] = dateString.split('-').map(Number);
+  // Month is zero-based in JS Date constructor
+  return new Date(year, month - 1, day);
+  }
 
   // Initial render on page load
   renderTodos();
