@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="styles.css" />
+<title>Advanced To-Do List</title>
+
+
+</head>
+<body>
+
+<h1>Advanced To-Do List</h1>
+<button id="loadbutton" class="load-save-btn" style="margin-bottom:1rem;">Load Todos from API</button>
+<button id="savebutton" class="load-save-btn" style="margin-bottom:1rem;">Save Todos to API</button>
+
+
+<!-- Form to add new to-dos with optional due date -->
+<form id="todo-form">
+  <input type="text" id="todo-input" placeholder="Enter new task" required />
+  <input type="date" id="due-date" />
+  <button type="submit">Add</button>
+</form>
+
+<!-- Container for the to-do list items -->
+<ul id="todo-list"></ul>
+
+<script>
+  // Array to hold the list of to-dos
+  let todos = [];
+
+  // Variables to track drag and drop source element
+  let dragSrcEl = null;
+
+  // Create a new to-do object with title and optional dueDate
+  function createTodo(title, dueDate) {
+    return {
+      id: Date.now(),        // Unique ID based on current timestamp
+      title,                 // To-do text title
+      completed: false,      // Initially not completed
+      dueDate: dueDate ? new Date(dueDate) : null  // Convert dueDate string to Date object or null
+    };
+  }
+
+  // Add a new to-do to the todos array and re-render the list
+  function addTodo(title, dueDate) {
+    todos.push(createTodo(title, dueDate));
+    renderTodos();
+  }
+
+  // Remove a to-do by its ID and re-render the list
+  function removeTodo(id) {
+    todos = todos.filter(todo => todo.id !== id);
+    renderTodos();
+  }
+
+  // Toggle completion status of a to-do by its ID and re-render
+  function toggleTodoCompleted(id) {
+    todos = todos.map(todo =>
+      todo.id === id ? { ...todo, completed: !todo.completed } : todo
+    );
+    renderTodos();
+  }
+
+  // Check if a to-do is overdue (due date before now and not completed)
+  function isOverdue(todo) {
+    if (!todo.dueDate) return false;
+    const now = new Date();
+    return !todo.completed && todo.dueDate < now;
+  }
+
+  // Render the todos array into the UI
+  function renderTodos() {
+    const ul = document.getElementById('todo-list');
+    ul.innerHTML = '';  // Clear current list
+
+    todos.forEach(todo => {
+      const li = document.createElement('li');
+      li.className = 'todo-item';
+
+      // Apply styles for completed and overdue
+      if (todo.completed) li.classList.add('completed');
+      if (isOverdue(todo)) li.classList.add('overdue');
+
+      // Make list item draggable and store its ID
+      li.setAttribute('draggable', true);
+      li.dataset.id = todo.id;
+
+      // Add drag event listeners
+      li.addEventListener('dragstart', handleDragStart);
+      li.addEventListener('dragover', handleDragOver);
+      li.addEventListener('drop', handleDrop);
+      li.addEventListener('dragend', handleDragEnd);
+
+      // Checkbox to toggle completion status
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.checked = todo.completed;
+      checkbox.addEventListener('change', () => toggleTodoCompleted(todo.id));
+      li.appendChild(checkbox);
+
+      // Display the to-do title text
+      const titleSpan = document.createElement('span');
+      titleSpan.className = 'todo-title';
+      titleSpan.textContent = todo.title;
+      li.appendChild(titleSpan);
+
+      // Show due date if present
+      if (todo.dueDate) {
+        const dueSpan = document.createElement('span');
+        dueSpan.className = 'due-date';
+        dueSpan.textContent = todo.dueDate.toLocaleDateString();
+
+        // Add overdue label and styling if overdue
+        if (isOverdue(todo)) {
+          dueSpan.classList.add('overdue-text');
+          dueSpan.textContent += ' (Overdue!)';
+        }
+        li.appendChild(dueSpan);
+      }
+
+      // Button to toggle completion (alternative to checkbox)
+      const completeBtn = document.createElement('button');
+      completeBtn.textContent = 'Complete';
+      completeBtn.className = 'complete-btn';
+      completeBtn.onclick = () => toggleTodoCompleted(todo.id);
+      li.appendChild(completeBtn);
+
+      // Delete button to remove the to-do
+      const deleteBtn = document.createElement('button');
+      deleteBtn.textContent = 'Delete';
+      deleteBtn.className = 'delete-btn';
+      deleteBtn.onclick = () => removeTodo(todo.id);
+      li.appendChild(deleteBtn);
+
+      // Append the fully built to-do item to the list
+      ul.appendChild(li);
+    });
+  }
+
+  // Handle drag start event: store dragged element and apply dragging style
+  function handleDragStart(e) {
+    dragSrcEl = e.currentTarget;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', e.currentTarget.dataset.id);
+    this.classList.add('dragging');
+  }
+
+  // Allow drag over by preventing default
+  function handleDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  }
+
+  // Handle drop event: reorder todos array and re-render list
+  function handleDrop(e) {
+    e.preventDefault();
+    const srcId = e.dataTransfer.getData('text/plain');
+    const tgtId = e.currentTarget.dataset.id;
+    if (srcId === tgtId) return; // Do nothing if dropped on itself
+
+    const srcIndex = todos.findIndex(todo => todo.id == srcId);
+    const tgtIndex = todos.findIndex(todo => todo.id == tgtId);
+
+    // Remove the dragged item from its original position
+    const [removed] = todos.splice(srcIndex, 1);
+
+    // Insert the dragged item at the drop target's position
+    todos.splice(tgtIndex, 0, removed);
+
+    renderTodos();
+  }
+
+  // Remove dragging style on drag end
+  function handleDragEnd(e) {
+    this.classList.remove('dragging');
+  }
+
+  // Form submit handler to add new to-do
+  document.getElementById('todo-form').addEventListener('submit', e => {
+    e.preventDefault();  // Prevent page reload on submit
+    const titleInput = document.getElementById('todo-input');
+    const dueDateInput = document.getElementById('due-date');
+
+    if (!titleInput.value.trim()) return;  // Ignore empty input
+
+    // Add to-do with title and optional due date
+    addTodo(titleInput.value.trim(), dueDateInput.value);
+
+    // Clear inputs after adding
+    titleInput.value = '';
+    dueDateInput.value = '';
+  });
+
+  // Initial render on page load
+  renderTodos();
+
+  // Placeholders for future features:
+  // - localStorage save/load
+  // - edit functionality
+  // - priority and sorting
+  // - search and filtering
+
+  // Placeholder: Implement localStorage save/load here
+
+  // Placeholder: Add edit functionality
+
+  // Placeholder: Add priority and sorting features
+
+  // Placeholder: Add search/filtering
+
+  // Asynchronously fetch todos from the API and load them into our app
+// Asynchronously fetch todos from the API and load them into our app
+async function loadTodos() {
+  try {
+    const response = await fetch('https://jsonplaceholder.typicode.com/todos?_limit=10');
+    if (!response.ok) throw new Error('Failed to fetch todos');
+    const data = await response.json();
+
+    // Map API data to local todo format with random due dates
+    const newTodos = data.map(item => ({
+      id: item.id,
+      title: item.title,
+      completed: item.completed,
+      dueDate: randomDueDate(),
+    }));
+
+    // Append new todos to existing list
+    todos = [...todos, ...newTodos];
+
+    renderTodos();
+  } catch (error) {
+    console.error('Error loading todos:', error);
+  }
+}
+
+// Helper function to generate a random due date within ±5 days of today
+function randomDueDate() {
+  const today = new Date();
+
+  // Random integer between -5 and +5 (days offset)
+  const offset = Math.floor(Math.random() * 11) - 5;
+
+  const date = new Date(today);
+
+  // Set the date offset by the random number of days
+  date.setDate(today.getDate() + offset);
+
+  return date;
+}
+
+
+// Add click event listener to call loadTodos when clicked
+loadbutton.addEventListener('click', () => {loadTodos();});
+savebutton.addEventListener('click', () => {});
+
+
+</script>
+
+</body>
+</html>
