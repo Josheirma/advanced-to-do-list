@@ -1,281 +1,334 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="stylesheet" href="styles.css" />
-<title>Advanced To-Do List</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="styles.css" />
+    <title>Advanced To-Do List</title>
+  </head>
+  <body>
+    <h1>Advanced To-Do List</h1>
+    <div class="filter-bar">
+      <button id="filterall" class="filter-btn active" data-filter="all">
+        All
+      </button>
+      <button id="filtercomplete" class="filter-btn" data-filter="completed">
+        Completed
+      </button>
+      <button id="filterpending" class="filter-btn" data-filter="pending">
+        Pending
+      </button>
+      <button id="filteroverdue" class="filter-btn" data-filter="pending">
+        Overdue
+      </button>
+    </div>
+    <button id="loadbutton" class="load-save-btn" style="margin-bottom: 1rem">
+      Load Todos from API
+    </button>
+    <button id="savebutton" class="load-save-btn" style="margin-bottom: 1rem">
+      Save Todos to API
+    </button>
 
+    <!-- Form to add new to-dos with optional due date -->
+    <form id="todo-form">
+      <input
+        type="text"
+        id="todo-input"
+        placeholder="Enter new task"
+        required
+      />
+      <input type="date" id="due-date" />
+      <button type="submit">Add</button>
+    </form>
 
-</head>
-<body>
+    <!-- Container for the to-do list items -->
+    <ul id="todo-list"></ul>
 
-<h1>Advanced To-Do List</h1>
-<button id="loadbutton" class="load-save-btn" style="margin-bottom:1rem;">Load Todos from API</button>
-<button id="savebutton" class="load-save-btn" style="margin-bottom:1rem;">Save Todos to API</button>
+    <script>
+      let currentFilter = "all"
+      // Returns a filtered array of todos based on the provided filterType.
+      // filterType can be: 'complete', 'overdue', 'pending', or 'all'.
+      // Defaults to 'all' if no value is passed in.
+      function getFilteredTodos(filterType = "all") {
+        applyFilter(filterType);
+        switch (filterType) {
+          case "complete": // Matches todos that have their 'completed' property set to true
+            return todos.filter((todo) => todo.completed);
 
+          case "overdue": // Matches todos that are overdue according to the isOverdue() helper function
+            return todos.filter((todo) => isOverdue(todo));
 
-<!-- Form to add new to-dos with optional due date -->
-<form id="todo-form">
-  <input type="text" id="todo-input" placeholder="Enter new task" required />
-  <input type="date" id="due-date" />
-  <button type="submit">Add</button>
-</form>
+          case "pending": // Matches todos that are NOT completed AND NOT overdue
+            return todos.filter((todo) => !todo.completed && !isOverdue(todo));
 
-<!-- Container for the to-do list items -->
-<ul id="todo-list"></ul>
-
-<script>
-  // Array to hold the list of to-dos
-  let todos = [];
-
-  // Variables to track drag and drop source element
-  let dragSrcEl = null;
-
-  // Create a new to-do object with title and optional dueDate
-  function createTodo(title, dueDate) {
-    return {
-      id: Date.now(),        // Unique ID based on current timestamp
-      title,                 // To-do text title
-      completed: false,      // Initially not completed
-      dueDate: dueDate ? parseDateAsLocal(dueDate) : null  // Convert dueDate string to Date object or null
-    };
-  }
-
-  // Add a new to-do to the todos array and re-render the list
-  function addTodo(title, dueDate) {
-    todos.push(createTodo(title, dueDate));
-    renderTodos();
-  }
-
-  // Remove a to-do by its ID and re-render the list
-  function removeTodo(id) {
-    todos = todos.filter(todo => todo.id !== id);
-    renderTodos();
-  }
-
-  // Toggle completion status of a to-do by its ID and re-render
-  function toggleTodoCompleted(id) {
-    todos = todos.map(todo =>
-      todo.id === id ? { ...todo, completed: !todo.completed } : todo
-    );
-    renderTodos();
-  }
-
-  // Check if a to-do is overdue (due date before now and not completed)
-  function isOverdue(todo) {
-    if (!todo.dueDate) return false;
-    const now = new Date();
-    return !todo.completed && todo.dueDate < now;
-  }
-
-  // Render the todos array into the UI
-  function renderTodos() {
-    const ul = document.getElementById('todo-list');
-    ul.innerHTML = '';  // Clear current list
-
-    todos.forEach(todo => {
-      const li = document.createElement('li');
-      li.className = 'todo-item';
-
-      // Apply styles for completed and overdue
-      if (todo.completed) li.classList.add('completed');
-      if (isOverdue(todo)) li.classList.add('overdue');
-
-      // Make list item draggable and store its ID
-      li.setAttribute('draggable', true);
-      li.dataset.id = todo.id;
-
-      // Add drag event listeners
-      li.addEventListener('dragstart', handleDragStart);
-      li.addEventListener('dragover', handleDragOver);
-      li.addEventListener('drop', handleDrop);
-      li.addEventListener('dragend', handleDragEnd);
-
-      // Checkbox to toggle completion status
-      const checkbox = document.createElement('input');
-      checkbox.type = 'checkbox';
-      checkbox.checked = todo.completed;
-      checkbox.addEventListener('change', () => toggleTodoCompleted(todo.id));
-      li.appendChild(checkbox);
-
-      // Display the to-do title text
-      
-      const titleSpan = document.createElement('input');
-      titleSpan.className = 'todo-title';
-      
-      titleSpan.value = todo.title;
-      // Update todo.title when user types
-      titleSpan.addEventListener('input', (e) => {
-      todo.title = e.target.value;
-      });
-      li.setAttribute('draggable', 'true');
-
-const input1 = li.querySelector('input');
-if (true) {
-  input1.setAttribute('draggable', 'false');
-}
-      li.appendChild(titleSpan);
-
-      // Show due date if present
-      if (todo.dueDate) {
-        const dueSpan = document.createElement('span');
-        dueSpan.className = 'due-date';
-        dueSpan.textContent = todo.dueDate.toLocaleDateString();
-
-        // Add overdue label and styling if overdue
-        if (isOverdue(todo)) {
-          dueSpan.classList.add('overdue-text');
-          dueSpan.textContent += ' (Overdue!)';
+          case "all": // Matches all todos without filtering
+          default: // Also used if an unknown filterType is passed in
+            return todos;
         }
-        li.appendChild(dueSpan);
       }
 
-      // Button to toggle completion (alternative to checkbox)
-      const completeBtn = document.createElement('button');
-      completeBtn.textContent = 'Complete';
-      completeBtn.className = 'complete-btn';
-      completeBtn.onclick = () => toggleTodoCompleted(todo.id);
-      li.appendChild(completeBtn);
+      // When user changes filter, update currentFilter
+      function applyFilter(filterType) {
+        currentFilter = filterType;
+      }
 
-      // Delete button to remove the to-do
-      const deleteBtn = document.createElement('button');
-      deleteBtn.textContent = 'Delete';
-      deleteBtn.className = 'delete-btn';
-      deleteBtn.onclick = () => removeTodo(todo.id);
-      li.appendChild(deleteBtn);
+      // Array to hold the list of to-dos
+      let todos = [];
 
-      // Append the fully built to-do item to the list
-      ul.appendChild(li);
-    });
-  }
+      // Variables to track drag and drop source element
+      let dragSrcEl = null;
 
-  // Handle drag start event: store dragged element and apply dragging style
-  function handleDragStart(e) {
-    dragSrcEl = e.currentTarget;
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', e.currentTarget.dataset.id);
-    this.classList.add('dragging');
-    
-  }
+      // Create a new to-do object with title and optional dueDate
+      function createTodo(title, dueDate) {
+        return {
+          id: Date.now(), // Unique ID based on current timestamp
+          title, // To-do text title
+          completed: false, // Initially not completed
+          dueDate: dueDate ? parseDateAsLocal(dueDate) : null, // Convert dueDate string to Date object or null
+        };
+      }
 
-  // Allow drag over by preventing default
-  function handleDragOver(e) {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-  }
+      // Add a new to-do to the todos array and re-render the list
+      function addTodo(title, dueDate) {
+        todos.push(createTodo(title, dueDate));
+        renderTodos();
+      }
 
-  // Handle drop event: reorder todos array and re-render list
-  function handleDrop(e) {
-    e.preventDefault();
-    const srcId = e.dataTransfer.getData('text/plain');
-    const tgtId = e.currentTarget.dataset.id;
-    if (srcId === tgtId) return; // Do nothing if dropped on itself
+      // Remove a to-do by its ID and re-render the list
+      function removeTodo(id) {
+        todos = todos.filter((todo) => todo.id !== id);
+        renderTodos();
+      }
 
-    const srcIndex = todos.findIndex(todo => todo.id == srcId);
-    const tgtIndex = todos.findIndex(todo => todo.id == tgtId);
+      // Toggle completion status of a to-do by its ID and re-render
+      function toggleTodoCompleted(id) {
+        todos = todos.map((todo) =>
+          todo.id === id ? { ...todo, completed: !todo.completed } : todo
+        );
+        renderTodos();
+      }
 
-    // Remove the dragged item from its original position
-    const [removed] = todos.splice(srcIndex, 1);
+      // Check if a to-do is overdue (due date before now and not completed)
+      function isOverdue(todo) {
+        if (!todo.dueDate) return false;
+        const now = new Date();
+        return !todo.completed && todo.dueDate < now;
+      }
 
-    // Insert the dragged item at the drop target's position
-    todos.splice(tgtIndex, 0, removed);
+      // Render the todos array into the UI
+      function renderTodos(filtertype = "all") {
+        const ul = document.getElementById("todo-list");
+        ul.innerHTML = ""; // Clear current list
 
-    renderTodos();
-  }
+        const filteredTodos = getFilteredTodos(filtertype);
 
-  // Remove dragging style on drag end
-  function handleDragEnd(e) {
-    this.classList.remove('dragging');
-  }
+        filteredTodos.forEach((todo) => {
+          const li = document.createElement("li");
+          li.className = "todo-item";
+          // Apply styles for completed and overdue
+          if (todo.completed) li.classList.add("completed");
+          if (isOverdue(todo)) li.classList.add("overdue");
 
-  // Form submit handler to add new to-do
-  document.getElementById('todo-form').addEventListener('submit', e => {
-    e.preventDefault();  // Prevent page reload on submit
-    const titleInput = document.getElementById('todo-input');
-    const dueDateInput = document.getElementById('due-date');
+          // Make list item draggable and store its ID
+          li.setAttribute("draggable", true);
+          li.dataset.id = todo.id;
 
-    if (!titleInput.value.trim()) return;  // Ignore empty input
+          // Add drag event listeners
+          li.addEventListener("dragstart", handleDragStart);
+          li.addEventListener("dragover", handleDragOver);
+          li.addEventListener("drop", handleDrop);
+          li.addEventListener("dragend", handleDragEnd);
 
-    // Add to-do with title and optional due date
-    addTodo(titleInput.value.trim(), dueDateInput.value);
+          // Checkbox to toggle completion status
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.checked = todo.completed;
+          checkbox.addEventListener("change", () =>
+            toggleTodoCompleted(todo.id)
+          );
+          li.appendChild(checkbox);
 
-    // Clear inputs after adding
-    titleInput.value = '';
-    dueDateInput.value = '';
-  });
+          // Display the to-do title text
 
+          const titleSpan = document.createElement("input");
+          titleSpan.className = "todo-title";
 
-  function parseDateAsLocal(dateString) {
-  const [year, month, day] = dateString.split('-').map(Number);
-  // Month is zero-based in JS Date constructor
-  return new Date(year, month - 1, day);
-  }
+          titleSpan.value = todo.title;
+          // Update todo.title when user types
+          titleSpan.addEventListener("input", (e) => {
+            todo.title = e.target.value;
+          });
+          li.appendChild(titleSpan);
 
-  // Initial render on page load
-  renderTodos();
+          // Show due date if present
+          if (todo.dueDate) {
+            const dueSpan = document.createElement("span");
+            dueSpan.className = "due-date";
+            dueSpan.textContent = todo.dueDate.toLocaleDateString();
 
-  // Placeholders for future features:
-  // - localStorage save/load
-  // - edit functionality
-  // - priority and sorting
-  // - search and filtering
+            // Add overdue label and styling if overdue
+            if (isOverdue(todo)) {
+              dueSpan.classList.add("overdue-text");
+              dueSpan.textContent += " (Overdue!)";
+            }
+            li.appendChild(dueSpan);
+          }
 
-  // Placeholder: Implement localStorage save/load here
+          // Button to toggle completion (alternative to checkbox)
+          const completeBtn = document.createElement("button");
+          completeBtn.textContent = "Complete";
+          completeBtn.className = "complete-btn";
+          completeBtn.onclick = () => toggleTodoCompleted(todo.id);
+          li.appendChild(completeBtn);
 
-  // Placeholder: Add edit functionality
+          // Delete button to remove the to-do
+          const deleteBtn = document.createElement("button");
+          deleteBtn.textContent = "Delete";
+          deleteBtn.className = "delete-btn";
+          deleteBtn.onclick = () => removeTodo(todo.id);
+          li.appendChild(deleteBtn);
 
-  // Placeholder: Add priority and sorting features
+          // Append the fully built to-do item to the list
+          ul.appendChild(li);
+        });
+      }
 
-  // Placeholder: Add search/filtering
+      // Handle drag start event: store dragged element and apply dragging style
+      function handleDragStart(e) {
+        dragSrcEl = e.currentTarget;
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", e.currentTarget.dataset.id);
+        this.classList.add("dragging");
+      }
 
-  // Asynchronously fetch todos from the API and load them into our app
-// Asynchronously fetch todos from the API and load them into our app
-async function loadTodos() {
-  try {
-    const response = await fetch('https://jsonplaceholder.typicode.com/todos?_limit=10');
-    if (!response.ok) throw new Error('Failed to fetch todos');
-    const data = await response.json();
+      // Allow drag over by preventing default
+      function handleDragOver(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+      }
 
-    // Map API data to local todo format with random due dates
-    const newTodos = data.map(item => ({
-      id: item.id,
-      title: item.title,
-      completed: item.completed,
-      dueDate: randomDueDate(),
-    }));
+      // Handle drop event: reorder todos array and re-render list
+      function handleDrop(e) {
+        e.preventDefault();
+        const srcId = e.dataTransfer.getData("text/plain");
+        const tgtId = e.currentTarget.dataset.id;
+        if (srcId === tgtId) return; // Do nothing if dropped on itself
 
-    // Append new todos to existing list
-    todos = [...todos, ...newTodos];
+        const srcIndex = todos.findIndex((todo) => todo.id == srcId);
+        const tgtIndex = todos.findIndex((todo) => todo.id == tgtId);
 
-    renderTodos();
-  } catch (error) {
-    console.error('Error loading todos:', error);
-  }
-}
+        // Remove the dragged item from its original position
+        const [removed] = todos.splice(srcIndex, 1);
 
-// Helper function to generate a random due date within ±5 days of today
-function randomDueDate() {
-  const today = new Date();
+        // Insert the dragged item at the drop target's position
+        todos.splice(tgtIndex, 0, removed);
 
-  // Random integer between -5 and +5 (days offset)
-  const offset = Math.floor(Math.random() * 11) - 5;
+        renderTodos(currentFilter);
+      }
 
-  const date = new Date(today);
+      // Remove dragging style on drag end
+      function handleDragEnd(e) {
+        this.classList.remove("dragging");
+      }
 
-  // Set the date offset by the random number of days
-  date.setDate(today.getDate() + offset);
+      // Form submit handler to add new to-do
+      document.getElementById("todo-form").addEventListener("submit", (e) => {
+        e.preventDefault(); // Prevent page reload on submit
+        const titleInput = document.getElementById("todo-input");
+        const dueDateInput = document.getElementById("due-date");
 
-  return date;
-}
+        if (!titleInput.value.trim()) return; // Ignore empty input
 
+        // Add to-do with title and optional due date
+        addTodo(titleInput.value.trim(), dueDateInput.value);
 
-// Add click event listener to call loadTodos when clicked
-loadbutton.addEventListener('click', () => {loadTodos();});
-savebutton.addEventListener('click', () => {});
+        // Clear inputs after adding
+        titleInput.value = "";
+        dueDateInput.value = "";
+      });
 
+      function parseDateAsLocal(dateString) {
+        const [year, month, day] = dateString.split("-").map(Number);
+        // Month is zero-based in JS Date constructor
+        return new Date(year, month - 1, day);
+      }
 
-</script>
+      // Initial render on page load
+      renderTodos();
 
-</body>
+      // Placeholders for future features:
+      // - localStorage save/load
+      // - edit functionality
+      // - priority and sorting
+      // - search and filtering
+
+      // Placeholder: Implement localStorage save/load here
+
+      // Placeholder: Add edit functionality
+
+      // Placeholder: Add priority and sorting features
+
+      // Placeholder: Add search/filtering
+
+      // Asynchronously fetch todos from the API and load them into our app
+      // Asynchronously fetch todos from the API and load them into our app
+      async function loadTodos() {
+        try {
+          const response = await fetch(
+            "https://jsonplaceholder.typicode.com/todos?_limit=10"
+          );
+          if (!response.ok) throw new Error("Failed to fetch todos");
+          const data = await response.json();
+
+          // Map API data to local todo format with random due dates
+          const newTodos = data.map((item) => ({
+            id: item.id,
+            title: item.title,
+            completed: item.completed,
+            dueDate: randomDueDate(),
+          }));
+
+          // Append new todos to existing list
+          todos = [...todos, ...newTodos];
+
+          renderTodos();
+        } catch (error) {
+          console.error("Error loading todos:", error);
+        }
+      }
+
+      // Helper function to generate a random due date within ±5 days of today
+      function randomDueDate() {
+        const today = new Date();
+
+        // Random integer between -5 and +5 (days offset)
+        const offset = Math.floor(Math.random() * 11) - 5;
+
+        const date = new Date(today);
+
+        // Set the date offset by the random number of days
+        date.setDate(today.getDate() + offset);
+
+        return date;
+      }
+
+      // Add click event listener to call loadTodos when clicked
+      loadbutton.addEventListener("click", () => {
+        loadTodos();
+      });
+      savebutton.addEventListener("click", () => {});
+      filterall.addEventListener("click", () => {
+        renderTodos("all");
+      });
+      filtercomplete.addEventListener("click", () => {
+        renderTodos("complete");
+      });
+      filterpending.addEventListener("click", () => {
+        renderTodos("pending");
+      });
+      filteroverdue.addEventListener("click", () => {
+        renderTodos("overdue");
+      });
+    </script>
+  </body>
 </html>
