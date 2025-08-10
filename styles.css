@@ -168,6 +168,39 @@ li.dragging {
   font-weight: bold;
 }
 
+/* dot */
+.dotBtn {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  outline: none;
+  transition: background-color 0.3s ease;
+  position: relative;
+  
+  background-color: blue;
+}
+
+/* Tooltip styling on hover */
+.dotBtn[aria-label]:hover::after {
+  content: attr(aria-label);
+  position: absolute;
+  bottom: 125%; /* position above the dot */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: white;
+  padding: 5px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  font-size: 0.8rem;
+  opacity: 0.9;
+  pointer-events: none;
+  z-index: 10;
+}
+/*-----*/
+
 button.complete-btn,
 button.delete-btn {
   flex: 0 0 auto;

@@ -37,18 +37,18 @@
       ✓ Uncomplete All
     </button>
 
-    <button class="delete-all-btn" title="Delete All">
-      × Delete All
-    </button>
-    <button id="loadLocalBtn" aria-label="Load Todos from Local Storage"></button>
+    <button class="delete-all-btn" title="Delete All">× Delete All</button>
+    <button
+      id="loadLocalBtn"
+      aria-label="Load Todos from Local Storage"
+    ></button>
     <button id="saveLocalBtn" aria-label="Save Todos to Local Storage"></button>
+    <button id="sort-priority-btn">Sort by Priority</button>
     <div>
-
       <form id="search-form">
-      <input type="text" id="search-input" placeholder="Search..." />
-      <button type="submit">Search</button>
+        <input type="text" id="search-input" placeholder="Search..." />
+        <button type="submit">Search</button>
       </form>
-
     </div>
 
     <!-- Form to add new to-dos with optional due date -->
@@ -67,7 +67,7 @@
     <ul id="todo-list"></ul>
 
     <script>
-      let currentFilter = "all"
+      let currentFilter = "all";
       // Returns a filtered array of todos based on the provided filterType.
       // filterType can be: 'complete', 'overdue', 'pending', or 'all'.
       // Defaults to 'all' if no value is passed in.
@@ -75,18 +75,21 @@
         applyFilter(filterType);
         switch (filterType) {
           case "complete": // Matches todos that have their 'completed' property set to true
-            return todos.filter((todo) => todo.completed);
-
+            filteredTodos.filter((todo) => todo.completed);
+            break;
           case "overdue": // Matches todos that are overdue according to the isOverdue() helper function
-            return todos.filter((todo) => isOverdue(todo));
-
+            filteredTodos.filter((todo) => isOverdue(todo));
+            break;
           case "pending": // Matches todos that are NOT completed AND NOT overdue
-            return todos.filter((todo) => !todo.completed && !isOverdue(todo));
-
+            filteredTodos.filter((todo) => !todo.completed && !isOverdue(todo));
+            break;
           case "all": // Matches all todos without filtering
+          //filteredTodos = [...todos]
+          break;
           default: // Also used if an unknown filterType is passed in
-            return todos;
+            //filteredTodos = [...todos]
         }
+        renderTodos()
       }
 
       // When user changes filter, update currentFilter
@@ -95,7 +98,7 @@
       }
 
       // Array to hold the list of to-dos
-      let todos = [];
+      //let todos = [];
 
       // Variables to track drag and drop source element
       let dragSrcEl = null;
@@ -107,24 +110,25 @@
           title, // To-do text title
           completed: false, // Initially not completed
           dueDate: dueDate ? parseDateAsLocal(dueDate) : null, // Convert dueDate string to Date object or null
+          priority: "none",
         };
       }
 
       // Add a new to-do to the todos array and re-render the list
       function addTodo(title, dueDate) {
-        todos.push(createTodo(title, dueDate));
-        renderTodos();
+        filteredTodos.push(createTodo(title, dueDate));
+        getFilteredTodos(currentFilter);
       }
 
       // Remove a to-do by its ID and re-render the list
       function removeTodo(id) {
-        todos = todos.filter((todo) => todo.id !== id);
-        renderTodos();
+        todos = filteredTodos.filter((todo) => todo.id !== id);
+         getFilteredTodos(currentFilter);
       }
 
       // Toggle completion status of a to-do by its ID and re-render
       function toggleTodoCompleted(id) {
-        todos = todos.map((todo) =>
+        filteredTodos.map((todo) =>
           todo.id === id ? { ...todo, completed: !todo.completed } : todo
         );
         renderTodos();
@@ -137,14 +141,17 @@
         return !todo.completed && todo.dueDate < now;
       }
 
+      let dotBtn;
+      let filteredTodos = [];// = [...todos];
+
       // Render the todos array into the UI
-      function renderTodos(filtertype = "all") {
+      function renderTodos() {
         const ul = document.getElementById("todo-list");
         ul.innerHTML = ""; // Clear current list
-
-        const filteredTodos = getFilteredTodos(filtertype);
-
-        filteredTodos.forEach((todo) => {
+        //if (filtertype != "fromfilterbypriority"){
+        //filteredTodos = getFilteredTodos(filtertype);
+        //}
+        filteredTodos.forEach((todo, index) => {
           const li = document.createElement("li");
           li.className = "todo-item";
           // Apply styles for completed and overdue
@@ -170,25 +177,21 @@
           );
           li.appendChild(checkbox);
 
-          // Display the to-do title text
-
+          // To-do title input
           const titleSpan = document.createElement("input");
           titleSpan.className = "todo-title";
-
           titleSpan.value = todo.title;
-          // Update todo.title when user types
           titleSpan.addEventListener("input", (e) => {
             todo.title = e.target.value;
           });
           li.appendChild(titleSpan);
 
-          // Show due date if present
+          // Due date display
           if (todo.dueDate) {
             const dueSpan = document.createElement("span");
             dueSpan.className = "due-date";
             dueSpan.textContent = todo.dueDate.toLocaleDateString();
 
-            // Add overdue label and styling if overdue
             if (isOverdue(todo)) {
               dueSpan.classList.add("overdue-text");
               dueSpan.textContent += " (Overdue!)";
@@ -196,21 +199,41 @@
             li.appendChild(dueSpan);
           }
 
-          // Button to toggle completion (alternative to checkbox)
+          // *** Priority dot button ***
+          const dotBtn = document.createElement("button");
+          dotBtn.className = "dotBtn";
+          dotBtn.dataset.index = index;
+
+          // Set initial color based on todo.priority (default to 'none')
+          updateDotColor(dotBtn, todo.priority || "none");
+
+          // Click handler cycles priority
+          dotBtn.addEventListener("click", () => {
+            const levels = ["none", "low", "medium", "high"];
+            let currentIndex = levels.indexOf(todo.priority || "none");
+            //so currentindex + 1 = 4 is 0 using modulus
+            currentIndex = (currentIndex + 1) % levels.length;
+            todo.priority = levels[currentIndex];
+
+            // Update dot color immediately
+            updateDotColor(dotBtn, todo.priority);
+          });
+
+          li.appendChild(dotBtn);
+
+          // Complete and delete buttons
           const completeBtn = document.createElement("button");
           completeBtn.textContent = "Complete";
           completeBtn.className = "complete-btn";
           completeBtn.onclick = () => toggleTodoCompleted(todo.id);
           li.appendChild(completeBtn);
 
-          // Delete button to remove the to-do
           const deleteBtn = document.createElement("button");
           deleteBtn.textContent = "Delete";
           deleteBtn.className = "delete-btn";
           deleteBtn.onclick = () => removeTodo(todo.id);
           li.appendChild(deleteBtn);
 
-          // Append the fully built to-do item to the list
           ul.appendChild(li);
         });
       }
@@ -236,16 +259,16 @@
         const tgtId = e.currentTarget.dataset.id;
         if (srcId === tgtId) return; // Do nothing if dropped on itself
 
-        const srcIndex = todos.findIndex((todo) => todo.id == srcId);
-        const tgtIndex = todos.findIndex((todo) => todo.id == tgtId);
+        const srcIndex = filteredTodos.findIndex((todo) => todo.id == srcId);
+        const tgtIndex = filteredTodos.findIndex((todo) => todo.id == tgtId);
 
         // Remove the dragged item from its original position
-        const [removed] = todos.splice(srcIndex, 1);
+        const [removed] = filteredTodos.splice(srcIndex, 1);
 
         // Insert the dragged item at the drop target's position
-        todos.splice(tgtIndex, 0, removed);
+        filteredTodos.splice(tgtIndex, 0, removed);
 
-        renderTodos(currentFilter);
+        getFilteredTodos(currentFilter);
       }
 
       // Remove dragging style on drag end
@@ -273,6 +296,50 @@
         const [year, month, day] = dateString.split("-").map(Number);
         // Month is zero-based in JS Date constructor
         return new Date(year, month - 1, day);
+      }
+
+      // Helper to set dot color based on priority
+      function updateDotColor(dot, priority) {
+        const colors = {
+          none: "blue",
+          low: "green",
+          medium: "yellow",
+          high: "red",
+        };
+        dot.style.backgroundColor = colors[priority] || colors.none;
+        dot.setAttribute(
+          "title",
+          priority.charAt(0).toUpperCase() + priority.slice(1)
+        ); // tooltip
+      }
+
+      function getTodosSortedByPriority() {
+        const priorityOrder = { high: 1, medium: 2, low: 3, none: 4 };
+
+        const filtered = filteredTodos;
+
+        return filtered.slice().sort((a, b) => {
+          const aPriority = a.priority || "none";
+          const bPriority = b.priority || "none";
+          return priorityOrder[aPriority] - priorityOrder[bPriority];
+        });
+      }
+
+      function searchTitles(){
+
+        const searchInput = document.getElementById("search-input");
+
+        searchInput.addEventListener("input", () => {
+          const query = searchInput.value.toLowerCase();
+          
+          // Filter tasks by checking if title includes the query
+           filteredTodos = filteredTodos.filter(todo =>
+            todo.title.toLowerCase().includes(query)
+          );
+
+          renderTodos();
+});
+
       }
 
       // Initial render on page load
@@ -308,6 +375,7 @@
             title: item.title,
             completed: item.completed,
             dueDate: randomDueDate(),
+            priority: "none",
           }));
 
           // Append new todos to existing list
@@ -340,16 +408,24 @@
       });
       savebutton.addEventListener("click", () => {});
       filterall.addEventListener("click", () => {
-        renderTodos("all");
+        getFilteredTodos("all");
       });
       filtercomplete.addEventListener("click", () => {
-        renderTodos("complete");
+        getFilteredTodos("complete");
       });
       filterpending.addEventListener("click", () => {
-        renderTodos("pending");
+        getFilteredTodos("pending");
       });
       filteroverdue.addEventListener("click", () => {
-        renderTodos("overdue");
+        getFilteredTodos("overdue");
+      });
+      document.getElementById("sort-priority-btn").addEventListener("click", () => {
+      filteredTodos = getTodosSortedByPriority();
+      renderTodos();
+      });
+      document.getElementById("search-input").addEventListener("click", () => {
+      searchTitles();
+      
       });
     </script>
   </body>
