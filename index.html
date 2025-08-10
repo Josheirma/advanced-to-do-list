@@ -100,9 +100,21 @@
       li.appendChild(checkbox);
 
       // Display the to-do title text
-      const titleSpan = document.createElement('span');
+      
+      const titleSpan = document.createElement('input');
       titleSpan.className = 'todo-title';
-      titleSpan.textContent = todo.title;
+      
+      titleSpan.value = todo.title;
+      // Update todo.title when user types
+      titleSpan.addEventListener('input', (e) => {
+      todo.title = e.target.value;
+      });
+      li.setAttribute('draggable', 'true');
+
+const input1 = li.querySelector('input');
+if (true) {
+  input1.setAttribute('draggable', 'false');
+}
       li.appendChild(titleSpan);
 
       // Show due date if present

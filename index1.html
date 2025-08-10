@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Draggable Todo List with Editable Inputs</title>
+<style>
+  li {
+  cursor: grab;
+  /* other styles */
+}
+
+li.dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+}
+
+.todo-title {
+  flex: 1;
+  cursor: grab;       /* <-- add this */
+  font-size: 1rem;
+}
+
+.todo-title:active {
+  cursor: grabbing;   /* <-- add this */
+}
+
+</style>
+</head>
+<body>
+
+<ul id="todo-list"></ul>
+
+<script>
+  // Sample todo data
+  let todos = [
+    { id: 1, title: 'Learn JS', completed: false },
+    { id: 2, title: 'Write code', completed: false },
+    { id: 3, title: 'Test dragging', completed: false }
+  ];
+
+  let dragSrcEl = null;
+
+  function renderTodos() {
+    const ul = document.getElementById('todo-list');
+    ul.innerHTML = '';
+
+    todos.forEach(todo => {
+      const li = document.createElement('li');
+      li.className = 'todo-item';
+      li.setAttribute('draggable', 'true');
+      li.dataset.id = todo.id;
+
+      // Input for editing title
+      const titleInput = document.createElement('input');
+      titleInput.type = 'text';
+      titleInput.className = 'todo-title';
+      titleInput.value = todo.title;
+      
+
+      // Sync edits to todo.title
+      titleInput.addEventListener('input', e => {
+        todo.title = e.target.value;
+      });
+
+      li.appendChild(titleInput);
+
+      // Drag event listeners on <li>
+      li.addEventListener('dragstart', handleDragStart);
+      li.addEventListener('dragover', handleDragOver);
+      li.addEventListener('drop', handleDrop);
+      li.addEventListener('dragend', handleDragEnd);
+
+      ul.appendChild(li);
+    });
+  }
+
+  // Drag handlers
+  function handleDragStart(e) {
+    dragSrcEl = e.currentTarget;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', e.currentTarget.dataset.id);
+    e.currentTarget.classList.add('dragging');
+  }
+
+  function handleDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    const srcId = e.dataTransfer.getData('text/plain');
+    const tgtId = e.currentTarget.dataset.id;
+    if (srcId === tgtId) return;
+
+    const srcIndex = todos.findIndex(t => t.id == srcId);
+    const tgtIndex = todos.findIndex(t => t.id == tgtId);
+
+    // Move dragged todo to new position
+    const [moved] = todos.splice(srcIndex, 1);
+    todos.splice(tgtIndex, 0, moved);
+
+    renderTodos();
+  }
+
+  function handleDragEnd(e) {
+    e.currentTarget.classList.remove('dragging');
+  }
+
+  // Initial render
+  renderTodos();
+</script>
+
+</body>
+</html>

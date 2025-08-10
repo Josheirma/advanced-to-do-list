@@ -94,11 +94,27 @@ h1 {
   flex: 1 1 100%;
   margin: 0.25rem 0;
   word-break: break-word;
+  cursor: grab;
+  border: none;         /* remove border lines */
+ background: #f0f0f0;/* grey background */
+ outline: none; /* removes focus outline */
+  
 }
+
+.todo-title:active {
+  cursor: grabbing;   /* <-- add this */
+  border: none; 
+}
+
 
 .completed .todo-title {
   text-decoration: line-through;
   color: gray;
+}
+
+li.dragging {
+  
+  cursor: grabbing;
 }
 
 .overdue {
