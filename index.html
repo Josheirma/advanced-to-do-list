@@ -29,6 +29,28 @@
       Save Todos to API
     </button>
 
+    <button class="complete-all-btn" title="Complete All">
+      ✓ Complete All
+    </button>
+
+    <button class="unomplete-all-btn" title="unComplete All">
+      ✓ Uncomplete All
+    </button>
+
+    <button class="delete-all-btn" title="Delete All">
+      × Delete All
+    </button>
+    <button id="loadLocalBtn" aria-label="Load Todos from Local Storage"></button>
+    <button id="saveLocalBtn" aria-label="Save Todos to Local Storage"></button>
+    <div>
+
+      <form id="search-form">
+      <input type="text" id="search-input" placeholder="Search..." />
+      <button type="submit">Search</button>
+      </form>
+
+    </div>
+
     <!-- Form to add new to-dos with optional due date -->
     <form id="todo-form">
       <input
