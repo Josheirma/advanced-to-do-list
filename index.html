@@ -38,11 +38,10 @@
     </button>
 
     <button class="delete-all-btn" title="Delete All">× Delete All</button>
-    <button
-      id="loadLocalBtn"
-      aria-label="Load Todos from Local Storage"
-    ></button>
+    
+    <button id="loadLocalBtn"aria-label="Load Todos from Local Storage"></button>
     <button id="saveLocalBtn" aria-label="Save Todos to Local Storage"></button>
+    
     <button id="sort-priority-btn">Sort by Priority</button>
     <div>
       <form id="search-form">
@@ -75,19 +74,19 @@
         applyFilter(filterType);
         switch (filterType) {
           case "complete": // Matches todos that have their 'completed' property set to true
-            filteredTodos.filter((todo) => todo.completed);
+            filteredTodos = toodos.filter((todo) => todo.completed);
             break;
           case "overdue": // Matches todos that are overdue according to the isOverdue() helper function
-            filteredTodos.filter((todo) => isOverdue(todo));
+            filteredTodos = todos.filter((todo) => isOverdue(todo));
             break;
           case "pending": // Matches todos that are NOT completed AND NOT overdue
-            filteredTodos.filter((todo) => !todo.completed && !isOverdue(todo));
+            filteredTodos = todos.filter((todo) => !todo.completed && !isOverdue(todo));
             break;
           case "all": // Matches all todos without filtering
-          //filteredTodos = [...todos]
+          filteredTodos = [...todos]
           break;
           default: // Also used if an unknown filterType is passed in
-            //filteredTodos = [...todos]
+            filteredTodos = [...todos]
         }
         renderTodos()
       }
@@ -98,7 +97,8 @@
       }
 
       // Array to hold the list of to-dos
-      //let todos = [];
+      let todos = [];
+      let filteredTodos = [];
 
       // Variables to track drag and drop source element
       let dragSrcEl = null;
@@ -116,19 +116,19 @@
 
       // Add a new to-do to the todos array and re-render the list
       function addTodo(title, dueDate) {
-        filteredTodos.push(createTodo(title, dueDate));
+        todos.push(createTodo(title, dueDate));
         getFilteredTodos(currentFilter);
       }
 
       // Remove a to-do by its ID and re-render the list
       function removeTodo(id) {
-        todos = filteredTodos.filter((todo) => todo.id !== id);
+        todos.filter((todo) => todo.id !== id);
          getFilteredTodos(currentFilter);
       }
 
       // Toggle completion status of a to-do by its ID and re-render
       function toggleTodoCompleted(id) {
-        filteredTodos.map((todo) =>
+        todos.map((todo) =>
           todo.id === id ? { ...todo, completed: !todo.completed } : todo
         );
         renderTodos();
@@ -142,7 +142,7 @@
       }
 
       let dotBtn;
-      let filteredTodos = [];// = [...todos];
+      //let filteredTodos = [];// = [...todos];
 
       // Render the todos array into the UI
       function renderTodos() {
@@ -268,7 +268,8 @@
         // Insert the dragged item at the drop target's position
         filteredTodos.splice(tgtIndex, 0, removed);
 
-        getFilteredTodos(currentFilter);
+        //getFilteredTodos(currentFilter);
+        renderTodos();
       }
 
       // Remove dragging style on drag end
@@ -333,7 +334,7 @@
           const query = searchInput.value.toLowerCase();
           
           // Filter tasks by checking if title includes the query
-           filteredTodos = filteredTodos.filter(todo =>
+           filteredTodos = todos.filter(todo =>
             todo.title.toLowerCase().includes(query)
           );
 
