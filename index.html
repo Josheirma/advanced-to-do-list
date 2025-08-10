@@ -174,19 +174,50 @@
             li.appendChild(dueSpan);
           }
 
-          // Button to toggle completion (alternative to checkbox)
-          const completeBtn = document.createElement("button");
-          completeBtn.textContent = "Complete";
-          completeBtn.className = "complete-btn";
-          completeBtn.onclick = () => toggleTodoCompleted(todo.id);
-          li.appendChild(completeBtn);
+          // // Button to toggle completion (alternative to checkbox)
+          // const completeBtn = document.createElement("button");
+          // completeBtn.textContent = "Complete";
+          // completeBtn.className = "complete-btn";
+          // completeBtn.onclick = () => toggleTodoCompleted(todo.id);
+          // li.appendChild(completeBtn);
+
+          /**/
+          // Container for buttons with some spacing
+          const btnContainer = document.createElement("div");
+          btnContainer.style.display = "inline-flex";
+          btnContainer.style.gap = "8px"; // space between buttons
+          btnContainer.className = "btn-container"; 
+
+          // Complete All button (check icon)
+          const completeAllBtn = document.createElement("button");
+          completeAllBtn.title = "Complete All";
+          completeAllBtn.className = "icon-btn complete-all-btn";
+          completeAllBtn.innerHTML = "✔️"; // Check mark icon (you can replace with SVG or font icon)
+          completeAllBtn.onclick = () => completeAllTodos();  // Define this function
+
+          // Clear All button (cross icon)
+          const clearAllBtn = document.createElement("button");
+          clearAllBtn.title = "Clear All";
+          clearAllBtn.className = "icon-btn clear-all-btn";
+          clearAllBtn.innerHTML = "❌"; // Cross mark icon (replace as you like)
+          clearAllBtn.onclick = () => clearAllTodos();  // Define this function
+
+          // Append buttons to container
+          btnContainer.appendChild(completeAllBtn);
+          btnContainer.appendChild(clearAllBtn);
+          
+
+          // Append container to the list item (or wherever appropriate)
+          li.appendChild(btnContainer);
+                    /**/
 
           // Delete button to remove the to-do
           const deleteBtn = document.createElement("button");
           deleteBtn.textContent = "Delete";
           deleteBtn.className = "delete-btn";
           deleteBtn.onclick = () => removeTodo(todo.id);
-          li.appendChild(deleteBtn);
+          //li.appendChild(deleteBtn);
+          btnContainer.appendChild(deleteBtn); 
 
           // Append the fully built to-do item to the list
           ul.appendChild(li);
