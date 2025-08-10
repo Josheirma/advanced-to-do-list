@@ -181,35 +181,7 @@
           // completeBtn.onclick = () => toggleTodoCompleted(todo.id);
           // li.appendChild(completeBtn);
 
-          /**/
-          // Container for buttons with some spacing
-          const btnContainer = document.createElement("div");
-          btnContainer.style.display = "inline-flex";
-          btnContainer.style.gap = "8px"; // space between buttons
-          btnContainer.className = "btn-container"; 
-
-          // Complete All button (check icon)
-          const completeAllBtn = document.createElement("button");
-          completeAllBtn.title = "Complete All";
-          completeAllBtn.className = "icon-btn complete-all-btn";
-          completeAllBtn.innerHTML = "✔️"; // Check mark icon (you can replace with SVG or font icon)
-          completeAllBtn.onclick = () => completeAllTodos();  // Define this function
-
-          // Clear All button (cross icon)
-          const clearAllBtn = document.createElement("button");
-          clearAllBtn.title = "Clear All";
-          clearAllBtn.className = "icon-btn clear-all-btn";
-          clearAllBtn.innerHTML = "❌"; // Cross mark icon (replace as you like)
-          clearAllBtn.onclick = () => clearAllTodos();  // Define this function
-
-          // Append buttons to container
-          btnContainer.appendChild(completeAllBtn);
-          btnContainer.appendChild(clearAllBtn);
           
-
-          // Append container to the list item (or wherever appropriate)
-          li.appendChild(btnContainer);
-                    /**/
 
           // Delete button to remove the to-do
           const deleteBtn = document.createElement("button");
@@ -283,6 +255,14 @@
         // Month is zero-based in JS Date constructor
         return new Date(year, month - 1, day);
       }
+
+      // Clear all todos function
+      function clearAllTodos() {
+        todos.length = 0;          // Clear the array (if it's an array)
+        saveTodos();               // Save updated empty list to storage if you have one
+        renderTodos();             // Re-render the list to update UI
+      }
+
 
       // Initial render on page load
       renderTodos();
@@ -360,6 +340,12 @@
       filteroverdue.addEventListener("click", () => {
         renderTodos("overdue");
       });
+      // Example event handler for Clear All button
+      clearAllBtn.onclick = () => {
+        if (confirm("Are you sure you want to clear all todos?")) {
+          clearAllTodos();
+        }
+      };
     </script>
   </body>
 </html>
