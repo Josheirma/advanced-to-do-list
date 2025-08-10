@@ -254,23 +254,24 @@
 
       // Handle drop event: reorder todos array and re-render list
       function handleDrop(e) {
-        e.preventDefault();
-        const srcId = e.dataTransfer.getData("text/plain");
-        const tgtId = e.currentTarget.dataset.id;
-        if (srcId === tgtId) return; // Do nothing if dropped on itself
+  e.preventDefault();
+  const srcId = e.dataTransfer.getData("text/plain");
+  const tgtId = e.currentTarget.dataset.id;
+  if (srcId === tgtId) return;
 
-        const srcIndex = filteredTodos.findIndex((todo) => todo.id == srcId);
-        const tgtIndex = filteredTodos.findIndex((todo) => todo.id == tgtId);
+  const srcIndex = filteredTodos.findIndex((todo) => todo.id == srcId);
+  const tgtIndex = filteredTodos.findIndex((todo) => todo.id == tgtId);
 
-        // Remove the dragged item from its original position
-        const [removed] = filteredTodos.splice(srcIndex, 1);
+  const [removed] = filteredTodos.splice(srcIndex, 1);
+  filteredTodos.splice(tgtIndex, 0, removed);
 
-        // Insert the dragged item at the drop target's position
-        filteredTodos.splice(tgtIndex, 0, removed);
+  // ✅ Update the master todos array to match new order
+  todos = filteredTodos.concat(
+    todos.filter(t => !filteredTodos.some(f => f.id === t.id))
+  );
 
-        //getFilteredTodos(currentFilter);
-        renderTodos();
-      }
+  renderTodos();
+}
 
       // Remove dragging style on drag end
       function handleDragEnd(e) {
