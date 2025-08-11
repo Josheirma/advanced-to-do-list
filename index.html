@@ -116,7 +116,7 @@
       // Add a new to-do to the todos array and re-render the list
       function addTodo(title, dueDate) {
         todos.push(createTodo(title, dueDate));
-        getFilteredTodos(currentFilter);
+        getFilteredTodos("all");
       }
 
       // Remove a to-do by its ID and re-render the list
