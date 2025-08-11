@@ -73,7 +73,7 @@
         applyFilter(filterType);
         switch (filterType) {
           case "complete": // Matches todos that have their 'completed' property set to true
-            filteredTodos = toodos.filter((todo) => todo.completed);
+            filteredTodos = todos.filter((todo) => todo.completed);
             break;
           case "overdue": // Matches todos that are overdue according to the isOverdue() helper function
             filteredTodos = todos.filter((todo) => isOverdue(todo));
@@ -382,7 +382,7 @@
 
           // Append new todos to existing list
           todos = [...todos, ...newTodos];
-
+          filteredTodos = [...todos];
           renderTodos();
         } catch (error) {
           console.error("Error loading todos:", error);
