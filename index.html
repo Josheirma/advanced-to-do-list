@@ -9,16 +9,16 @@
   <body>
     <h1>Advanced To-Do List</h1>
     <div class="filter-bar">
-      <button id="filterall" class="filter-btn active" data-filter="all">
+      <button id="filterall" class="regular-btn active" data-filter="all">
         All
       </button>
-      <button id="filtercomplete" class="filter-btn" data-filter="completed">
+      <button id="filtercomplete" class="regular-btn" data-filter="completed">
         Completed
       </button>
-      <button id="filterpending" class="filter-btn" data-filter="pending">
+      <button id="filterpending" class="regular-btn" data-filter="pending">
         Pending
       </button>
-      <button id="filteroverdue" class="filter-btn" data-filter="pending">
+      <button id="filteroverdue" class="regular-btn" data-filter="pending">
         Overdue
       </button>
     </div>
@@ -29,26 +29,25 @@
       Save Todos to API
     </button>
 
-    <button class="complete-all-btn" title="Complete All">
-      ✓ Complete All
+    <div class = "buttons-container">
+    <button class="regular-btn" title="Complete All">
+      ✓ All Toggle
     </button>
 
-    <button class="unomplete-all-btn" title="unComplete All">
-      ✓ Uncomplete All
-    </button>
-
-    <button class="delete-all-btn" title="Delete All">× Delete All</button>
+    <button class="regular-btn" title="Delete All">× All</button>
     
-    <button id="loadLocalBtn"aria-label="Load Todos from Local Storage"></button>
-    <button id="saveLocalBtn" aria-label="Save Todos to Local Storage"></button>
+    <button id="load-btn" title="Load from localStorage" style="font-size: 24px;">🔄</button>
+    <button id="save-btn" title="Save to localStorage" style="font-size: 24px;">💾</button>
     
-    <button id="sort-priority-btn">Sort by Priority</button>
+    <button id="sort-priority-btn" class = "regular-btn" >Sort by Priority</button>
+    </div>
     <div>
       <form id="search-form">
         <input type="text" id="search-input" placeholder="Search..." />
-        <button type="submit">Search</button>
+       
       </form>
     </div>
+    
 
     <!-- Form to add new to-dos with optional due date -->
     <form id="todo-form">
