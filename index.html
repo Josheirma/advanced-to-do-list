@@ -30,7 +30,7 @@
     </button>
 
     <div class = "buttons-container">
-    <button class="regular-btn" title="Complete All">
+    <button id = "alltoggle" class="regular-btn" title="Complete All">
       ✓ All Toggle
     </button>
 
@@ -358,6 +358,23 @@
           getFilteredTodos();
       }
 
+      function toggleAllCompletes(){
+
+        // Check if all todos are already completed
+        const allCompleted = todos.every(todo => todo.completed);
+
+        // Set all todos to the opposite of allCompleted
+        todos = todos.map(todo => ({
+          ...todo,
+          completed: !allCompleted,
+        }));
+
+        filteredTodos = [...todos]
+
+        renderTodos();  // Update the UI
+
+      }
+
       // Initial render on page load
       renderTodos();
 
@@ -466,6 +483,12 @@
       filteredTodos = [];
       removeTodo();
       });
+
+      document.getElementById("alltoggle").addEventListener("click", () => {
+      toggleAllCompletes();
+      });
+
+      
 
     </script>
   </body>
