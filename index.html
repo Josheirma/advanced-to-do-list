@@ -121,15 +121,16 @@
 
       // Remove a to-do by its ID and re-render the list
       function removeTodo(id) {
-        todos.filter((todo) => todo.id !== id);
+        todos = todos.filter((todo) => todo.id !== id);
          getFilteredTodos(currentFilter);
       }
 
       // Toggle completion status of a to-do by its ID and re-render
       function toggleTodoCompleted(id) {
-        todos.map((todo) =>
+        todos =todos.map((todo) =>
           todo.id === id ? { ...todo, completed: !todo.completed } : todo
         );
+        filteredTodos = [...todos]
         renderTodos();
       }
 
