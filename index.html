@@ -340,8 +340,22 @@
           );
 
           renderTodos();
-});
+        });
 
+      }
+
+      function saveToLocalStorage(){
+        localStorage.setItem('todos', JSON.stringify(todos));
+      }
+
+      function loadFromLocalStorage(){
+          const todosJson = localStorage.getItem('todos');
+          if (todosJson) {
+            todos = JSON.parse(todosJson);
+          } else {
+            todos = []; // or default todos
+          }
+          getFilteredTodos();
       }
 
       // Initial render on page load
@@ -427,8 +441,22 @@
       });
       document.getElementById("search-input").addEventListener("click", () => {
       searchTitles();
+      })
       
+      document.getElementById("save-btn").addEventListener("click", () => {
+      saveToLocalStorage();
       });
+
+      document.getElementById("load-btn").addEventListener("click", () => {
+      loadFromLocalStorage();
+      });
+
+      document.querySelector('.regular-btn[title="Delete All"]').addEventListener('click', () => {
+      todos = [];
+      filteredTodos = [];
+      removeTodo();
+      });
+
     </script>
   </body>
 </html>
