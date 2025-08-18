@@ -26,7 +26,7 @@
       Load Todos from API
     </button>
     <button id="savebutton" class="load-save-btn" style="margin-bottom: 1rem">
-      Save Todos to API
+      Save Todos to API - non functional
     </button>
 
     <div class = "buttons-container">
@@ -140,17 +140,12 @@
         const now = new Date();
         return !todo.completed && todo.dueDate < now;
       }
-
       let dotBtn;
-      //let filteredTodos = [];// = [...todos];
 
       // Render the todos array into the UI
       function renderTodos() {
         const ul = document.getElementById("todo-list");
         ul.innerHTML = ""; // Clear current list
-        //if (filtertype != "fromfilterbypriority"){
-        //filteredTodos = getFilteredTodos(filtertype);
-        //}
         filteredTodos.forEach((todo, index) => {
           const li = document.createElement("li");
           li.className = "todo-item";
@@ -178,7 +173,8 @@
           li.appendChild(checkbox);
 
           // To-do title input
-          const titleSpan = document.createElement("input");
+          const titleSpan 
+          = document.createElement("input");
           titleSpan.className = "todo-title";
           titleSpan.value = todo.title;
           titleSpan.addEventListener("input", (e) => {
@@ -254,24 +250,23 @@
 
       // Handle drop event: reorder todos array and re-render list
       function handleDrop(e) {
-  e.preventDefault();
-  const srcId = e.dataTransfer.getData("text/plain");
-  const tgtId = e.currentTarget.dataset.id;
-  if (srcId === tgtId) return;
+        e.preventDefault();
+        const srcId = e.dataTransfer.getData("text/plain");
+        const tgtId = e.currentTarget.dataset.id;
+        if (srcId === tgtId) return;
 
-  const srcIndex = filteredTodos.findIndex((todo) => todo.id == srcId);
-  const tgtIndex = filteredTodos.findIndex((todo) => todo.id == tgtId);
+        const srcIndex = filteredTodos.findIndex((todo) => todo.id == srcId);
+        const tgtIndex = filteredTodos.findIndex((todo) => todo.id == tgtId);
 
-  const [removed] = filteredTodos.splice(srcIndex, 1);
-  filteredTodos.splice(tgtIndex, 0, removed);
+        const [removed] = filteredTodos.splice(srcIndex, 1);
+        filteredTodos.splice(tgtIndex, 0, removed);
 
-  // ✅ Update the master todos array to match new order
-  todos = filteredTodos.concat(
-    todos.filter(t => !filteredTodos.some(f => f.id === t.id))
-  );
-
-  renderTodos();
-}
+        // ✅ Update the master todos array to match new order
+        todos = filteredTodos.concat(
+          todos.filter(t => !filteredTodos.some(f => f.id === t.id))
+        );
+        renderTodos();
+      }
 
       // Remove dragging style on drag end
       function handleDragEnd(e) {
